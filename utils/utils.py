@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.metrics import precision_recall_fscore_support, accuracy_score
 from sklearn.cluster import KMeans
 
-def evaluate_models(FS_cluster_models, neg_balances_to_try, mode='dev'):    
+def evaluate_models(FS_cluster_models, neg_balances_to_try, mode='dev', tune_by='f1'):    
     for i, FS_cluster in enumerate(FS_cluster_models):
         accs = []
         f1s = []
@@ -16,11 +16,17 @@ def evaluate_models(FS_cluster_models, neg_balances_to_try, mode='dev'):
             acc = accuracy_score(data_temporal[f'Y_{mode}'], [
                 1 if pred > 0.5 else -1 for pred in preds_individual
             ])
-            accs.append(acc)
-            f1s.append(f1[1])
+            if len(f1) > 1:
+                accs.append(acc)
+                f1s.append(f1[1])
+            else:
+                continue
         best_acc_idx = np.argmax(np.array(accs))
         best_f1_idx = np.argmax(np.array(f1s))
-        FS_cluster.set_best_cb(neg_balances_to_try[best_f1_idx])
+        if tune_by == 'f1':
+            FS_cluster.set_best_cb(neg_balances_to_try[best_f1_idx])
+        else:
+            FS_cluster.set_best_cb(neg_balances_to_try[best_acc_idx])
         FS_cluster_models[i] = FS_cluster
     preds_all = []
     Y_arranged = []
@@ -31,7 +37,6 @@ def evaluate_models(FS_cluster_models, neg_balances_to_try, mode='dev'):
                 data_temporal[f'L_{mode}']).reshape(len(data_temporal[f'Y_{mode}']))
         preds_all.extend(preds_individual)
         Y_arranged.extend(data_temporal[f'Y_{mode}'])
-        print("BEST CB", FS_cluster.best_cb)
     best_pre, best_rec, best_f1, best_support = precision_recall_fscore_support(Y_arranged, [
             1 if pred > 0.5 else -1 for pred in preds_all
         ])
@@ -62,7 +67,7 @@ def test_model(FS_cluster_models, best_cbs):
 def evaluate_thresholds(thresholds, cluster_models, neg_balances_to_try,
                         L_train_expanded, L_dev_expanded, L_test_expanded,
                         Y_dev_raw, Y_test_raw, train_cluster_labels, dev_cluster_labels, test_cluster_labels,
-                        evaluate_test=False, tune_test=False, best_cbs=None):
+                        evaluate_test=False, tune_test=False, best_cbs=None, tune_by='f1'):
     
     L_train_raw = L_train_expanded
     L_dev_raw = L_dev_expanded
@@ -118,7 +123,7 @@ def evaluate_thresholds(thresholds, cluster_models, neg_balances_to_try,
         for neg_balance in neg_balances_to_try:
             FS_cluster.fit(FS_cluster.data_temporal['L_train'], FS_cluster.data_temporal['Y_dev'], neg_balance)
         cluster_models[i] = FS_cluster
-    acc, pre, rec, f1, support, FS_cluster_dev = evaluate_models(cluster_models, neg_balances_to_try, mode = 'dev')
+    acc, pre, rec, f1, support, FS_cluster_dev = evaluate_models(cluster_models, neg_balances_to_try, mode = 'dev', tune_by=tune_by)
     
     print('Dev Thresholds: {}'.format(thresholds))
     print('Dev Acc: {:.2%}\tPre: {:.2%}\tRec: {:.2%}\tF1: {:.2%}'.format(
@@ -126,7 +131,7 @@ def evaluate_thresholds(thresholds, cluster_models, neg_balances_to_try,
 
     
     if tune_test:
-        acc_test, pre_test, rec_test, f1_test, support_test, FS_cluster_test = evaluate_models(cluster_models, neg_balances_to_try, mode = 'test')
+        acc_test, pre_test, rec_test, f1_test, support_test, FS_cluster_test = evaluate_models(cluster_models, neg_balances_to_try, mode = 'test', tune_by=tune_by)
         print('Test Thresholds: {}'.format(thresholds))
         print('Test Acc: {:.2%}\tPre: {:.2%}\tRec: {:.2%}\tF1: {:.2%}'.format(
             acc_test, pre_test, rec_test, f1_test))
