@@ -23,27 +23,30 @@ def main(args):
     engine = "ada"
     dataset = cfg['dataset']
     thresholds = cfg['thresholds']
-    
-    embedding_path = f"/hdd2/dyah/epoxy-clip/artifacts/OpenAI/{engine}/{dataset}_records"
+    T = cfg['T']
+    embedding_path = cfg['embedding_path']
+    if 'data_path' in cfg:
+            data_path = cfg['data_path']
+    else:
+        data_path = embedding_path
+            
     if 'embedding_type' in cfg:
         embedding_type = cfg['embedding_type']
-        L_dev_raw_orig = torch.load(os.path.join(embedding_path, f'val_L_{embedding_type}.pt')).detach().cpu().numpy()
-        Y_dev_raw = torch.load(os.path.join(embedding_path, f'val_Y_{embedding_type}.pt')).detach().cpu().numpy()
-        Y_test_raw = torch.load(os.path.join(embedding_path, f'test_Y_{embedding_type}.pt')).detach().cpu().numpy()
-        L_train_raw_orig = torch.load(os.path.join(embedding_path, f'train_L_{embedding_type}.pt')).detach().cpu().numpy()
-        L_test_raw_orig = torch.load(os.path.join(embedding_path, f'test_L_{embedding_type}.pt')).detach().cpu().numpy()
-        Y_train_raw = torch.load(os.path.join(embedding_path, f'train_Y_{embedding_type}.pt')).detach().cpu().numpy()
+        L_dev_raw_orig = torch.load(os.path.join(data_path, f'val_L_{embedding_type}.pt')).detach().cpu().numpy()
+        Y_dev_raw = torch.load(os.path.join(data_path, f'val_Y_{embedding_type}.pt')).detach().cpu().numpy()
+        Y_test_raw = torch.load(os.path.join(data_path, f'test_Y_{embedding_type}.pt')).detach().cpu().numpy()
+        L_train_raw_orig = torch.load(os.path.join(data_path, f'train_L_{embedding_type}.pt')).detach().cpu().numpy()
+        L_test_raw_orig = torch.load(os.path.join(data_path, f'test_L_{embedding_type}.pt')).detach().cpu().numpy()
 
         avg_embeddings_train = torch.load(os.path.join(embedding_path, f'train_feature_{embedding_type}.pt')).detach().cpu().numpy()
         avg_embeddings_dev = torch.load(os.path.join(embedding_path, f'val_feature_{embedding_type}.pt')).detach().cpu().numpy()
         avg_embeddings_test = torch.load(os.path.join(embedding_path, f'test_feature_{embedding_type}.pt')).detach().cpu().numpy()
     else:
-        L_dev_raw_orig = torch.load(os.path.join(embedding_path, 'val_L.pt')).detach().cpu().numpy()
-        Y_dev_raw = torch.load(os.path.join(embedding_path, 'val_Y.pt')).detach().cpu().numpy()
-        Y_test_raw = torch.load(os.path.join(embedding_path, 'test_Y.pt')).detach().cpu().numpy()
-        L_train_raw_orig = torch.load(os.path.join(embedding_path, 'train_L.pt')).detach().cpu().numpy()
-        L_test_raw_orig = torch.load(os.path.join(embedding_path, 'test_L.pt')).detach().cpu().numpy()
-        Y_train_raw = torch.load(os.path.join(embedding_path, 'train_Y.pt')).detach().cpu().numpy()
+        L_dev_raw_orig = torch.load(os.path.join(data_path, 'val_L.pt')).detach().cpu().numpy()
+        Y_dev_raw = torch.load(os.path.join(data_path, 'val_Y.pt')).detach().cpu().numpy()
+        Y_test_raw = torch.load(os.path.join(data_path, 'test_Y.pt')).detach().cpu().numpy()
+        L_train_raw_orig = torch.load(os.path.join(data_path, 'train_L.pt')).detach().cpu().numpy()
+        L_test_raw_orig = torch.load(os.path.join(data_path, 'test_L.pt')).detach().cpu().numpy()
 
         avg_embeddings_train = torch.load(os.path.join(embedding_path, 'train_feature.pt')).detach().cpu().numpy()
         avg_embeddings_dev = torch.load(os.path.join(embedding_path,'val_feature.pt')).detach().cpu().numpy()
@@ -67,7 +70,6 @@ def main(args):
     L_dev_raw = L_dev_expanded
     L_test_raw = L_test_expanded
     
-    T = 1
 
     L_train = L_train_raw[:L_train_raw.shape[0] - (L_train_raw.shape[0] % T)]
     L_dev = L_dev_raw[:L_dev_raw.shape[0] - (L_dev_raw.shape[0] % T)]
