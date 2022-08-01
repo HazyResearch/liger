@@ -6,7 +6,7 @@ following paper:
 Mayee F. Chen*, Daniel Y. Fu*, Dyah Adila, Michael Zhang, Frederic Sala, Kayvon Fatahalian, Christopher Ré
 Paper: https://arxiv.org/abs/2203.13270
 
-![Liger](assets/banner.jpg)
+![Liger](assets/banner.png)
 
 ## Installation
 
