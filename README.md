@@ -4,6 +4,7 @@ following paper:
 
 **Shoring Up the Foundations: Fusing Model Embeddings and Weak Supervision**  
 Mayee F. Chen*, Daniel Y. Fu*, Dyah Adila, Michael Zhang, Frederic Sala, Kayvon Fatahalian, Christopher Ré
+
 Paper: https://arxiv.org/abs/2203.13270
 
 ![Liger](assets/banner.png)
